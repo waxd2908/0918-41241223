@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>剪刀石頭布遊戲</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        img {
+            width: 100px; /* 調整圖片大小 */
+            margin: 10px;
+            cursor: pointer;
+            transition: transform 0.3s;
+        }
+        img:hover {
+            transform: scale(1.1);
+        }
+        #scoreboard {
+            font-size: 24px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</head>
+<body>
+    <h1>剪刀石頭布遊戲</h1>
+    <h2>選擇一個：</h2>
+    <img src="scissors.png" alt="剪刀" onclick="play('剪刀')">
+    <img src="rock.png" alt="石頭" onclick="play('石頭')">
+    <img src="paper.png" alt="布" onclick="play('布')">
+
+    <h2 id="scoreboard">玩家得分: 0 | 電腦得分: 0</h2>
+
+    <!-- 音頻元素 -->
+    <audio id="winSound" src="win.wav"></audio>
+    <audio id="loseSound" src="lose.wav"></audio>
+    <audio id="drawSound" src="draw.mp3"></audio>
+
+    <script>
+        let computerWins = 0;
+        let playerWins = 0;
+
+        function play(userChoice) {
+            if (computerWins >= 3 || playerWins >= 3) return; // 遊戲結束，不再計算
+
+            const computerChoice = getComputerChoice();
+            let result;
+
+            if (userChoice === computerChoice) {
+                result = '平局！';
+                document.getElementById('drawSound').play(); // 播放平手音效
+            } else if (
+                (userChoice === '剪刀' && computerChoice === '布') ||
+                (userChoice === '石頭' && computerChoice === '剪刀') ||
+                (userChoice === '布' && computerChoice === '石頭')
+            ) {
+                result = '你贏了！';
+                playerWins++;
+                document.getElementById('winSound').play(); // 播放贏的音效
+            } else {
+                result = '你輸了！';
+                computerWins++;
+                document.getElementById('loseSound').play(); // 播放輸的音效
+            }
+
+            updateScoreboard();
+            checkGameEnd(result, computerChoice);
+        }
+
+        function getComputerChoice() {
+            const choices = ['剪刀', '石頭', '布'];
+            return choices[Math.floor(Math.random() * choices.length)];
+        }
+
+        function updateScoreboard() {
+            const scoreboardElement = document.getElementById('scoreboard');
+            scoreboardElement.innerText = `玩家得分: ${playerWins} | 電腦得分: ${computerWins}`;
+        }
+
+        function checkGameEnd(result, computerChoice) {
+            if (computerWins >= 3) {
+                Swal.fire({
+                    title: '電腦贏得遊戲！',
+                    text: '你選擇了: ' + computerChoice + '，結果: ' + result,
+                    icon: 'error',
+                    confirmButtonText: '重新開始'
+                }).then(() => {
+                    restartGame();
+                });
+            } else if (playerWins >= 3) {
+                Swal.fire({
+                    title: '你贏得遊戲！',
+                    text: '你選擇了: ' + computerChoice + '，結果: ' + result,
+                    icon: 'success',
+                    confirmButtonText: '重新開始'
+                }).then(() => {
+                    restartGame();
+                });
+            } else {
+                Swal.fire({
+                    title: '結果',
+                    text: '你選擇了: ' + userChoice + '，電腦選擇了: ' + computerChoice + '，結果: ' + result,
+                    icon: 'info',
+                    confirmButtonText: '確定'
+                });
+            }
+        }
+
+        function restartGame() {
+            computerWins = 0;
+            playerWins = 0;
+            updateScoreboard();
+        }
+    </script>
+</body>
+</html>
